@@ -1,0 +1,17 @@
+{
+  "name": "mybackend",
+  "version": "1.0.0",
+  "description": "A backend project with krishna's grace",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "javascript",
+    "backend",
+    "krishna's",
+    "mercy"
+  ],
+  "author": "Sandeep vishwakarma",
+  "license": "ISC"
+}
