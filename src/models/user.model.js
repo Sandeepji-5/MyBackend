@@ -2,7 +2,6 @@ import mongoose,{Schema} from "mongoose";
 import jwt from "jsonwebtoken"  // for generating tokens
 import bcrypt from "bcrypt" // for hashing password
 
-
 const userSchema = new Schema(
     {
         username:{
@@ -36,7 +35,7 @@ const userSchema = new Schema(
             },
             watchHistory:[
                 {
-                    type: Schema.Types.ObjectId,
+                    type: Schema.Types.ObjectId, // to store the id of the video
                     ref: "Video"
                 }
             ],
