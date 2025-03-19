@@ -14,4 +14,13 @@ app.use(express.urlencoded({extended: true, limit: "16kb"}))
 app.use(express.static("public"))       // to access the static files as images
 app.use(cookieParser() )               // to access the cookies
 
+// import routes
+import userRouter from "./routes/user.routes.js"
+
+// routes declearation
+app.use("/api/v1/users", userRouter)
+
+//http://localhost:8000/api/v1/users/register
+
 export {app}
+
