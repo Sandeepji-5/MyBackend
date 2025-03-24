@@ -19,7 +19,7 @@ const registerUser  = asyncHandler( async (req, res)=>{
   
 
     const {fullName, email, username, password} = req.body
-   console.log("email", email);
+  // console.log("email", email);
 
 
 
@@ -29,19 +29,22 @@ const registerUser  = asyncHandler( async (req, res)=>{
 
 // // check if user already exists
     const existedUser = await User.findOne({
-        $or:[{username}, {email}]
+        $or:[{username: username}, {email: email}]
     })
+
+    
     if(existedUser){
         throw new ApiError(409, "User With email or username already exists")
     }
+    console.log(req.files);
      
     const avatarLocalPath = req.files?.avatar[0]?.path;
-    const coverImageLoalPath = req.files?.coverImage[0]?.path;
+   // const coverImageLoalPath = req.files?.coverImage[0]?.path;
 
-//     // let coverImageLoalPath;
-//     // if(req.files && Array.isArray(req.files.coverImage)&& req.files.coverImage.length > 0){
-//     //     coverImageLoalPath = req.files.coverImage[0].path
-//     // }
+    let coverImageLoalPath;
+    if(req.files && Array.isArray(req.files.coverImage)&& req.files.coverImage.length > 0){
+        coverImageLoalPath = req.files.coverImage[0].path
+    }
 
 
 
@@ -63,16 +66,16 @@ const user  = await User.create({
     coverImage:coverImage?.url || "", // it may not be available
     email,
     password,
-    username: username.toLowercase()
+    username:username.toLowerCase() // ✅ Correct
+    
 })
         
 
-await createdUser.findById(user._id).select(
-    "-password -refreshToken"
-)
-if(!createdUser){
-    throw new ApiError(500," something went wrong while registering the user")
+const createdUser = await User.findById(user._id).select("-password -refreshToken");
+if (!createdUser) {
+    throw new ApiError(500, "Something went wrong while registering the user");
 }
+
 
 
 return res.status(201).json(
