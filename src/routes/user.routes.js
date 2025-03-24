@@ -7,15 +7,15 @@ const router = Router();
 
 router.route("/register").post(
     upload.fields([{
-        name:"avata",
+        name:"avatar",
         maxCount: 1
     },
 {
     name:"coverImage",
     maxCount: 1
-}]
-),
-        registerUser); // Use the imported function
+}
+]),
+registerUser); // Use the imported function
 
 
 export default router; 
