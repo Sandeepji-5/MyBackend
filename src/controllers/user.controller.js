@@ -104,8 +104,10 @@ return res.status(201).json(
  })
 // login user..........................
 const loginUser =  asyncHandler(async(req, res)=>{
-  
-
+    //console.log("User in request:", req.user);
+    if (req.user) {
+        throw new ApiError(400, "User is already logged in");
+    }
     // req body->data
     // username or email
     // find the user
@@ -126,9 +128,9 @@ const loginUser =  asyncHandler(async(req, res)=>{
         throw new ApiError(404,"user does not exist");
     }
 
-     const isPasswordVaild =  await user.isPasswordCorrect(password)
+     const isPasswordValid =  await user.isPasswordCorrect(password)
     
-     if(!isPasswordVaild){
+     if(!isPasswordValid){
         throw new ApiError(401, "Invalid User credentials");
      }
 
