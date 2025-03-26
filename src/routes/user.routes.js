@@ -1,5 +1,5 @@
 import { Router } from "express";
-import {loginUser, registerUser, logoutUser } from "../controllers/user.controller.js"; // Import the controller function
+import {loginUser, logoutUser, registerUser } from "../controllers/user.controller.js"; // Import the controller function
 import {upload} from "../middlewares/multer.middleware.js"
 import {verifyJWT} from "../middlewares/auth.middleware.js"
 
@@ -20,6 +20,7 @@ registerUser); // Use the imported function
 router.route("/login").post(loginUser)
 // secured routes
 router.route("/logout").post(verifyJWT, logoutUser)
+
 
 
 

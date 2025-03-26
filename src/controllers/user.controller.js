@@ -4,6 +4,7 @@ import { User } from "../models/user.model.js";
 import {uploadOnCloudinary} from "../utils/cloudinary.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 
+
 const generateAccessAndRefershTokens = async (userId) => {
     try{
     const user= await User.findById(userId)
@@ -113,7 +114,7 @@ const loginUser =  asyncHandler(async(req, res)=>{
     // send cookies
 
     const {email, username, password}= req.body
-    if(!username || ! email){
+    if(!username && ! email){
         throw new ApiError(400, "username or email is required")
     }
 
@@ -156,26 +157,32 @@ const loginUser =  asyncHandler(async(req, res)=>{
 })
 // logout User............................
 const logoutUser =  asyncHandler(async(req, res) =>{
+    if (!req.user || !req.user._id) {
+        throw new ApiError(401, "Unauthorized request");
+      }
+
+
+
+
    await  User.findByIdAndUpdate(
         req.user._id,
         {
-            set:{
+            $set:{
                 refreshToken: undefined
             }
         },
         {
             new: true
         }
-    
-    )
+    );
 const options = {
-    httpOnnly: true,
+    httpOnly: true,
     secure: true
 }
 return res
 .status(200)
-.clearCookies("accessToken", options)
-.clearCookies("refreshToken", options)
+.clearCookie("accessToken", options)
+.clearCookie("refreshToken", options)
 .json(new ApiResponse(200, {}, "User Loged Out"))
 })
 
