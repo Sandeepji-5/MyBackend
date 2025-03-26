@@ -26,24 +26,24 @@ const userSchema = new Schema(
             index: true,
             trim: true
             },
-            avatar:{
+        avatar:{
                 type: String , // cloudinary url
                 required: true,
             },
-            coverImage:{
+        coverImage:{
                 type: String,
             },
-            watchHistory:[
+        watchHistory:[
                 {
                     type: Schema.Types.ObjectId, // to store the id of the video
                     ref: "Video"
                 }
             ],
-            password:{
+        password:{
                 type: String,
                 required: [true, 'Password is Required']
             },
-            refreshToken:{
+        refreshToken:{
                 type: String
             }
         },
