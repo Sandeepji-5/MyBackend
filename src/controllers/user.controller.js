@@ -8,8 +8,8 @@ import { ApiResponse } from "../utils/ApiResponse.js";
 const generateAccessAndRefershTokens = async (userId) => {
     try{
     const user= await User.findById(userId)
-    const accessToken = user.generateAccessToken
-    const refreshToken =  user.generateRefreshToken
+    const accessToken = user.generateAccessToken()
+    const refreshToken =  user.generateRefreshToken()
     user.refreshToken = refreshToken 
     
     await user.save({validateBeforeSave: false})
@@ -121,9 +121,11 @@ const loginUser =  asyncHandler(async(req, res)=>{
     }
 
     const user  = await  User.findOne({
-        $or:[ {username},{email}]
+        $or: [{ username: username }, { email:email}]
+        
     })
-    if(!user)
+    console.log("User found:", user);
+    if(!user) 
     {
         throw new ApiError(404,"user does not exist");
     }
@@ -147,25 +149,23 @@ const loginUser =  asyncHandler(async(req, res)=>{
      .status(200)
      .cookie("accessToken", accessToken, options)
      .cookie("refreshtoken", refreshToken, options)
-     .json(
-        new ApiResponse(
-            200,
-            {
-                user: loggedInUser, accessToken, 
-                refreshToken
-            }, "User Logged In Successfully"
-        )
-     )
+     .json({"status":true,"data":user})
 })
+
+
+
+
+
+
+
 // logout User............................
+
 const logoutUser =  asyncHandler(async(req, res) =>{
+    console.log("User entered in the logout route");
+    
     if (!req.user || !req.user._id) {
         throw new ApiError(401, "Unauthorized request");
       }
-
-
-
-
    await  User.findByIdAndUpdate(
         req.user._id,
         {
@@ -179,8 +179,9 @@ const logoutUser =  asyncHandler(async(req, res) =>{
     );
 const options = {
     httpOnly: true,
-    secure: true
-}
+    secure: process.env.NODE_ENV === "production", // Ensure secure cookies only in production
+    sameSite: "Strict", // Helps prevent CSRF attacks
+};
 return res
 .status(200)
 .clearCookie("accessToken", options)
@@ -194,3 +195,4 @@ export {
     loginUser,
     logoutUser
 }
+ 
