@@ -10,7 +10,7 @@ const subscriptionSchema = new Schema(
         type: Schema.Types.ObjectId, // one to whom subscriber is subscribing
         ref: "User",
     } 
-},{timestamps: true}  
+},{timestamps: true}                // to add createdAt and updatedAt fields
 )
   
 export const subscription = mongoose.model("Subscription", subscriptionSchema)
