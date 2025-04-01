@@ -9,6 +9,8 @@ export const verifyJWT = asyncHandler(async(req, res, next) => {
         // console.log("Cookies:", req.cookies);
         // console.log("Authorization Header:", req.header("Authorization"));
 
+        console.log("Request Headers:", req.cookies?.accessToken, req.header("Authorization"));
+
         const token = req.cookies?.accessToken || req.header("Authorization")?.replace("Bearer ", "")
         console.log("Extracted Token:", token);
         // console.log(token);
@@ -18,6 +20,8 @@ export const verifyJWT = asyncHandler(async(req, res, next) => {
     
         const decodedToken = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET)
         console.log("Decoded Token:", decodedToken);
+
+        
         const user = await User.findById(decodedToken?._id).select("-password -refreshToken")
         console.log("Found User:", user);
         if (!user) {

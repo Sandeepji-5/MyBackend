@@ -11,8 +11,12 @@ const generateAccessAndRefershTokens = async (userId) => {
     const user= await User.findById(userId)
     const accessToken = user.generateAccessToken()
     const refreshToken =  user.generateRefreshToken()
+    console.log("Access Token:", accessToken);
+    console.log("Refresh Token:", refreshToken);
     user.refreshToken = refreshToken 
     
+   
+
     await user.save({validateBeforeSave: false})
     return {accessToken, refreshToken}
     }
@@ -39,25 +43,37 @@ const registerUser  = asyncHandler( async (req, res)=>{
 
   
 
-    const {fullName, email, username, password} = req.body
-  // console.log("email", email);
+    const {fullName, email, username, password} = req.body                   
 
 
+// .some() check if there any field is empty or undefined 
 
     if([fullName, email, username, password].some((field)=> field?.trim()=== "")){
         throw new ApiError(400," All fields are required " )
     }
+    
+//......................................................................................
+ // check if user already exists
+//$or ->  To ensure that both username and email are unique. If either one already exists, the user cannot register.
+//..........................................................................................
 
-// // check if user already exists
     const existedUser = await User.findOne({
         $or:[{username: username}, {email: email}]
     })
 
-    
+
+//.........................................................................
+   // if both matches then throw error otherwise it will register 
+    //const existedUser = await User.findOne({
+    //$and: [{ username: username }, { email: email }]
+//});
+//...........................................................................
+
     if(existedUser){
         throw new ApiError(409, "User With email or username already exists")
     }
-    console.log(req.files);
+  
+   // console.log("Existing User:", existedUser);
      
     const avatarLocalPath = req.files?.avatar[0]?.path;
    // const coverImageLoalPath = req.files?.coverImage[0]?.path;
@@ -77,6 +93,9 @@ const registerUser  = asyncHandler( async (req, res)=>{
     const avatar = await  uploadOnCloudinary(avatarLocalPath)
     const coverImage = await uploadOnCloudinary(coverImageLoalPath)
 
+  //  console.log("Avatar URL:", avatar.url);
+  //  console.log("Cover Image URL:", coverImage?.url);
+
     if(!avatar){
         throw new ApiError(400, " Avaatar file is required")
     }
@@ -87,22 +106,33 @@ const user  = await User.create({
     coverImage:coverImage?.url || "", // it may not be available
     email,
     password,
-    username:username.toLowerCase() // ✅ Correct
+    username:username.toLowerCase() // Correct
     
 })
-        
+// console.log("Request Body:", req.body);     
 
 const createdUser = await User.findById(user._id).select("-password -refreshToken");
 if (!createdUser) {
     throw new ApiError(500, "Something went wrong while registering the user");
 }
 
-
+//console.log("User Created in DB:", user);
 
 return res.status(201).json(
-    new ApiResponse(200, createdUser, "User registered Successfully")
+    new ApiResponse(200, user,  "User registered Successfully" )
 );
  })
+
+
+
+
+
+
+
+
+
+
+
 // login user..........................
 const loginUser =  asyncHandler(async(req, res)=>{
     //console.log("User in request:", req.user);
@@ -150,7 +180,9 @@ const loginUser =  asyncHandler(async(req, res)=>{
      .status(200)
      .cookie("accessToken", accessToken, options)
      .cookie("refreshtoken", refreshToken, options)
-     .json({"status":true,"data":user})
+     .json(
+        new ApiResponse(200, {user:loggedInUser,accessToken, refreshToken},
+         "User Logged In Successfully"))
 })
 
 // logout User............................
@@ -185,6 +217,7 @@ return res
 })
 
 // refresh access token
+
 
 const refreshAccessToken =   asyncHandler(async(req,res)=>
 {
@@ -457,10 +490,6 @@ const getWatchHistory = asyncHandler(async(req, res)=>{
     .json(new ApiResponse(200, user[0].watchHistory, "Watch History Fetched Successfully")) 
 
 })
-
-
-
-
 
 export {
     registerUser,
