@@ -5,6 +5,7 @@ import {
         registerUser,
         refreshAccessToken,
         changedCurrentPassword,
+        getCurrentUser,
         updateAccountDetails,
         updateUserAvatar,
         updateUserCoverImage,
@@ -39,7 +40,7 @@ router.route("/avatar").patch(verifyJWT,upload.single("avatar"), updateUserAvata
 router.route("/cover-image").patch(verifyJWT, upload.single("coverImage"),updateUserCoverImage)
 router.route("/c/:username").get(verifyJWT, getUserChannelProfile)
 router.route("/watch-history").get(verifyJWT, getWatchHistory)
-
+router.route("/current-user").get(verifyJWT, getCurrentUser);
 
 
 export default router; 

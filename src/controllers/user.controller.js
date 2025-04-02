@@ -251,6 +251,10 @@ const refreshAccessToken =   asyncHandler(async(req,res)=>
         const { accessToken, newRefreshToken} = await
          generateAccessAndRefershTokens(user._id)
        
+        console.log("New Access Token:", accessToken);
+        console.log("New Refresh Token:", newRefreshToken);
+
+
          return res
          .status(200)
          .cookie("accessToken", accessToken, options)
@@ -275,7 +279,8 @@ const changedCurrentPassword = asyncHandler(async(req, res) => {
     const { oldPassword, newPassword} =  req.body
 
     const user = await User.findById(req.user._id)
-    await user.isPasswordCorrect(oldPassword)
+  const  isPasswordCorrect =  await user.isPasswordCorrect(oldPassword)
+
     if(!isPasswordCorrect){
         throw new ApiError(401, "Invalid old  Password") 
     }
@@ -284,13 +289,13 @@ const changedCurrentPassword = asyncHandler(async(req, res) => {
      await user.save({validateBeforeSave: false})   
      return res
      .status(200)
-     .json(new ApiResponse(200, {}, "Password changed successfully"))   
+     .json(new ApiResponse(200, {newPassword,user}, "Password changed successfully"))   
 })
 
 const getCurrentUser = asyncHandler(async(req, res)=>{
-
+    console.log("Current User:", req.user);
     return res.status(200)
-    .json(new ApiResponse(200, req.user, "Current User fetched Successfully"))
+    .json(new ApiResponse(200,req.user , "Current User fetched Successfully"))
 })
 
 const updateAccountDetails  = asyncHandler(async(req, res)=>{
