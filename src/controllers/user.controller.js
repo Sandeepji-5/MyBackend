@@ -218,7 +218,7 @@ return res
 
 // refresh access token
 
-
+// have to check..............TODO
 const refreshAccessToken =   asyncHandler(async(req,res)=>
 {
    const incomingRefreshToken  =  req.cookies.refreshToken || req.body.refreshToken
@@ -233,7 +233,7 @@ const refreshAccessToken =   asyncHandler(async(req,res)=>
                  incomingRefreshToken,
                  process.env.REFRESH_TOKEN_SECRET
                )
-       const user = awaitUser.findById(decodedToken?._id)
+       const user = await User.findById(decodedToken?._id)
    
        if(!user){
             throw new ApiError(401, "Invalid RefreshToken")
@@ -304,18 +304,20 @@ const updateAccountDetails  = asyncHandler(async(req, res)=>{
     if(!fullName || !email){
         throw new ApiError(400, "Full Name and Email are required") 
     }
-     const user =  User.findByIdAndUpdate  (   // find the user by id and update the fields
+     const user = await  User.findByIdAndUpdate  (   // find the user by id and update the fields
         req.user?._id,                        //
         {
             $set:{
                 fullName,
-                email:   email
+                email
             }                                   // $set is used to update the fields
         },
         {new: true}
-    ).select("-password")                       // select all fields except password
-
-    return res
+    ).select("-password");                    // select all fields except password
+     
+    
+    console.log("Updated User:", user); // log the updated user
+     return res
     .status(200)
     .json(new ApiResponse(200, user, "Account details updated successfully"))// send the updated user
 })
@@ -351,7 +353,7 @@ const updateUserCoverImage = asyncHandler(async(req, res)=>{
     if(!coverImageLoalPath){                   // check if avatar path is missing
         throw new ApiError(400, "coverImage file is missing")
     }
-    const coverImage = await uploadOnCloudinary(avatarLocalPath)// upload the coverImage on cloudinary
+    const coverImage = await uploadOnCloudinary(coverImageLoalPath)// upload the coverImage on cloudinary
 
     if(!coverImage){                                        // check if coverImage is uploaded
         throw new ApiError(400, "Error while Uploading coverImage");
@@ -405,14 +407,14 @@ const getUserChannelProfile = asyncHandler(async(req, res)=>{
          $addFields:{                                            // add fields to the user object
 
             subscribersCount:{                                   // count the number of subscribers
-                $size: "$subscribers"
+                $size:  { $ifNull: ["$subscribers", []] }
             },
             channelsSubscribedToCount:{                        // count the number of channels subscribed to
-                $size:" $subscribedTo"
+                $size:{ $ifNull: ["$subscribedTo", []] }
             },
             isSubscribed:{                                    // check if the user is subscribed to the channel
                 $cond:{                                                                         
-                    if:{$in: [req.user?._id,"$subscribers.subscriber"]},        // check if the user id is in the subscribers array
+                    if: { $in: [req.user?._id, { $ifNull: ["$subscribers.subscriber", []] }] }  ,      // check if the user id is in the subscribers array
                     then: true,
                     else: false
                 }

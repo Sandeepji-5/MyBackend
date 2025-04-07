@@ -30,7 +30,6 @@ router.route("/register").post(
 }
 ]),
 registerUser); // Use the imported function
-
 router.route("/login").post(loginUser)
 router.route("/logout").post(verifyJWT, logoutUser)
 router.route("/refresh-token").post( refreshAccessToken)
@@ -41,7 +40,6 @@ router.route("/cover-image").patch(verifyJWT, upload.single("coverImage"),update
 router.route("/c/:username").get(verifyJWT, getUserChannelProfile)
 router.route("/watch-history").get(verifyJWT, getWatchHistory)
 router.route("/current-user").get(verifyJWT, getCurrentUser);
-
 
 export default router; 
 
